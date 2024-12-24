@@ -28,8 +28,6 @@ class DisplayManager {
     // Make constructor private
     DisplayManager() = default;
 
-    LGFX tft;
-
     void setupLabels();
     void setupPowerBar();
     void updatePowerBar(const BmsData &data);

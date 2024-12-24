@@ -56,8 +56,14 @@ void ChargeEstimator::update(const BmsData& data, uint32_t timestamp) {
 
             time_to_full_s = hours_to_full * 3600;
 
-            Serial.printf("Charge Stats: Rate=%.2f%%/h, Current=%.1fA, Time=%.1fh\n",
-                         avg_charge_rate, avg_charge_current, hours_to_full);
+            // Replace Serial.printf with Serial.print statements
+            Serial.print("Charge Stats: Rate=");
+            Serial.print(avg_charge_rate, 2);  // 2 decimal places
+            Serial.print("%/h, Current=");
+            Serial.print(avg_charge_current, 1);  // 1 decimal place
+            Serial.print("A, Time=");
+            Serial.print(hours_to_full, 1);  // 1 decimal place
+            Serial.println("h");
         }
     } else {
         // Reset when not charging

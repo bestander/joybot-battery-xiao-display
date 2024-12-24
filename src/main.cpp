@@ -1,4 +1,4 @@
-#include <Arduino.h>
+
 #include "display_manager.h"
 #include "metrics_averager.h"
 #include "charge_estimator.h"
@@ -11,7 +11,7 @@ using BmsClientType = BmsClientEmulator;
 using BmsClientType = BmsClient;
 #endif
 
-static constexpr const char* BATTERY_ADDRESS = "a4:c1:37:03:f9:fc";
+static constexpr const char* BATTERY_ADDRESS = "a4:c1:37:33:43:51";
 
 void onBmsData(const BmsData& rawData) {
     static MetricsAverager averager;
@@ -44,6 +44,7 @@ void onConnectionStatus(ConnectionState status) {
 
 void setup() {
     Serial.begin(115200);
+    Serial.println("Starting...");
     DisplayManager::instance().setup();
     BmsClientType::instance(BATTERY_ADDRESS, onBmsData, onConnectionStatus).setup();
 }
@@ -51,5 +52,5 @@ void setup() {
 void loop() {
     DisplayManager::instance().handleTasks();
     BmsClientType::instance().update();
-    delay(100);
+    delay(50);
 }

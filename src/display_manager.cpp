@@ -4,11 +4,13 @@ static constexpr int16_t POWER_BAR_DISCHARGING_MAX = 4000;  // 4kW
 static constexpr int16_t POWER_BAR_CHARGING_MAX = 1000;     // 1kW
 
 void DisplayManager::flushDisplay(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p) {
-    if (tft.getStartCount() == 0) {
-        tft.endWrite();
-    }
-    tft.pushImageDMA(area->x1, area->y1, area->x2 - area->x1 + 1, area->y2 - area->y1 + 1,
-                     (lgfx::swap565_t *)&color_p->full);
+    tft.drawRGBBitmap(
+        area->x1, 
+        area->y1, 
+        (uint16_t*)&color_p->full,  // Changed from lgfx::swap565_t
+        area->x2 - area->x1 + 1, 
+        area->y2 - area->y1 + 1
+    );
     lv_disp_flush_ready(disp);
 }
 
@@ -16,11 +18,15 @@ void DisplayManager::setup() {
     pinMode(3, OUTPUT);
     digitalWrite(3, HIGH);
 
-    tft.init();
-    tft.initDMA();
-    tft.startWrite();
-    tft.fillScreen(TFT_BLACK);
-
+    // 1. Configure SPI with maximum reliable speed
+    SPI.begin();
+    SPI.beginTransaction(SPISettings(80000000, MSBFIRST, SPI_MODE0));
+    
+    tft.begin();
+    tft.setRotation(0);  // Hardware rotation
+    tft.setSPISpeed(80000000);  // Match SPI speed
+    
+    // 2. Optimize LVGL settings
     lv_init();
     lv_disp_draw_buf_init(&draw_buf, buf[0], buf[1], 240 * 10);
 
@@ -31,6 +37,7 @@ void DisplayManager::setup() {
     disp_drv.flush_cb = flushDisplayStatic;
     disp_drv.user_data = this;
     disp_drv.draw_buf = &draw_buf;
+    disp_drv.full_refresh = 0; 
     lv_disp_drv_register(&disp_drv);
 
     lv_obj_set_style_bg_color(lv_scr_act(), lv_color_black(), LV_PART_MAIN);
